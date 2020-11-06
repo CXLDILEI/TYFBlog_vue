@@ -16,7 +16,6 @@
             </a-layout-header>
             <a-layout-content class="main-layout-content">
                 <div class="backgound"></div>
-                <div class="main-mask mask-top"></div>
                 <router-view></router-view>
             </a-layout-content>
         </a-layout>
@@ -56,12 +55,12 @@
     }
 
     .backgound {
-        position: fixed;
+        position: absolute;
         top: 0;
         left: 0;
         width: 100%;
         height: 100%;
-        z-index: -10;
+        z-index: 0;
         background: url("../../assets/backgound-img.jpg");
         zoom: 1;
         background-color: #ffff;
@@ -70,29 +69,18 @@
         background-size: cover;
         -webkit-background-size: cover;
         -o-background-size: cover;
-    }
-    .main-mask{
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        filter:alpha(Opacity=80);
-        -moz-opacity:0.5;
-        opacity: 0.5;
-        z-index:100;
-        background-color:#ffffff;
-    }
-    .mask-top{
-        top: 66px;
+        background-attachment: fixed;
+        opacity: .7;
     }
     .main-header{
         position: fixed;
         top: 0;
         left: 0;
         width: 100%;
+        z-index: 40;
     }
     .main-layout-content{
+        position: relative;
         padding-top: 64px;
     }
 </style>

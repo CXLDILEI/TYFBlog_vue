@@ -12,6 +12,8 @@
   color: #314659;
 }
 .main-content{
+  padding: 16px;
   background: transparent;
+  font-size: 15px;
 }
 </style>

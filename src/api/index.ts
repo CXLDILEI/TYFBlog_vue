@@ -100,10 +100,10 @@ _axios.interceptors.response.use(
 export function post<R>(url: string, data?: any, conf?: AxiosRequestConfig): ApiPromise<R> {
   return new Promise((resolve, reject) =>{
     _axios.request(Object.assign({}, conf, { url, method: 'post' }))
-      .then(res => {
+      .then((res) => {
         resolve(res.data);
       })
-      .catch(err => {
+      .catch((err) => {
         reject(err.data)
       })
   });
@@ -112,10 +112,10 @@ export function post<R>(url: string, data?: any, conf?: AxiosRequestConfig): Api
 export function get<R>(url: string, params?: any, conf?: AxiosRequestConfig): ApiPromise<R> {
   return new Promise((resolve, reject) =>{
     _axios.request(Object.assign({}, conf, { url, method: 'get',params}))
-      .then(res => {
+      .then((res:any) => {
         resolve(res.data);
       })
-      .catch(err => {
+      .catch((err:any) => {
         reject(err.data)
       })
   });
