@@ -9,10 +9,19 @@
                         v-model:selectedKeys="selectedKeys"
                         :style="{ lineHeight: '64px' }"
                 >
-                    <a-menu-item v-for="tab in componentList" :key="tab.key">
+                    <a-menu-item v-for="tab in componentList" :key="tab.key" @click="toMenu(tab.component)">
                         {{tab.name}}
                     </a-menu-item>
                 </a-menu>
+                <div class="userInfo-ctx">
+                    <a-row type="flex" :gutter="8">
+                        <a-col>
+                            <a-avatar size="large" class="avatar" @click="authMenus">
+                                登录
+                            </a-avatar>
+                        </a-col>
+                    </a-row>
+                </div>
             </a-layout-header>
             <a-layout-content class="main-layout-content">
                 <div class="backgound"></div>
@@ -23,25 +32,43 @@
 </template>
 
 <script lang="ts">
-  import {reactive, ref, defineComponent} from 'vue';
+    import {reactive, ref, defineComponent, getCurrentInstance} from 'vue';
 
-  export default defineComponent({
-    name: 'MainLayout',
-    setup(props, context) {
-      const selectedKeys = ref<String>('1');
-      const componentList = reactive([
-        {
-          name: '首页',
-          component: '',
-          key: '1'
+    export default defineComponent({
+        name: 'MainLayout',
+        setup(props, context) {
+            const selectedKeys = ref<String>('1');
+            const {ctx} = getCurrentInstance() as any;
+            const componentList = reactive([
+                {
+                    name: '首页',
+                    component: '/home',
+                    key: '1'
+                },
+                {
+                    name: '新笔记',
+                    component: '/addNote',
+                    key: '2'
+                }
+            ]);
+            const toMenu = ((name: string) => {
+                ctx.$router.push({
+                    name
+                })
+            })
+            const authMenus = () => {
+                ctx.$router.push({
+                    name: '/login'
+                })
+            }
+            return {
+                selectedKeys,
+                componentList,
+                toMenu,
+                authMenus
+            };
         }
-      ]);
-      return {
-        selectedKeys,
-        componentList
-      };
-    }
-  });
+    });
 </script>
 
 <style scoped>
@@ -54,33 +81,27 @@
         padding: 0 35vw;
     }
 
-    .backgound {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        z-index: 0;
-        background: url("../../assets/backgound-img.jpg");
-        zoom: 1;
-        background-color: #ffff;
-        background-repeat: no-repeat;
-        background-position: center 0;
-        background-size: cover;
-        -webkit-background-size: cover;
-        -o-background-size: cover;
-        background-attachment: fixed;
-        opacity: .7;
-    }
-    .main-header{
+
+    .main-header {
         position: fixed;
         top: 0;
         left: 0;
         width: 100%;
         z-index: 40;
     }
-    .main-layout-content{
+
+    .main-layout-content {
         position: relative;
         padding-top: 64px;
+    }
+
+    .userInfo-ctx {
+        position: absolute;
+        right: 0;
+        top: 0;
+    }
+
+    .avatar {
+        cursor: pointer;
     }
 </style>

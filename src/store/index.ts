@@ -1,8 +1,9 @@
 import { createStore } from 'vuex'
-
+export interface RootState {
+  user?: any;
+}
 export default createStore({
   state: {
-    token:null
   },
   mutations: {
   },
