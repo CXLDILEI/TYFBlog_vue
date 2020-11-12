@@ -1,4 +1,4 @@
-import {ApiPromise, get, post} from '@/api';
+import {ApiPromise, get, post, upLoad} from '@/api';
 
 export interface Form {
     title: string,
@@ -29,6 +29,6 @@ export function addNote(data: Form): ApiPromise<any> {
  * 笔记上传图片
  * @param file
  */
-export function uploadimg(file: Blob): ApiPromise<any> {
-    return post('/note/uploadimg', file, {headers: {'content-type': 'application/x-www-form-urlencoded'}})
+export function uploadimg(file: Blob|FormData): ApiPromise<any> {
+    return upLoad('/note/uploadimg', file, {headers: {'content-type': 'application/x-www-form-urlencoded'}})
 }

@@ -28,35 +28,6 @@
                 </a-col>
             </a-row>
         </a-form>
-        <a-modal
-                title="图片设置"
-                v-model:visible="state.visible"
-                :confirm-loading="state.confirmLoading"
-                @ok="uploadImg"
-        >
-            <a-row class="margin-b-default" type="flex" justify="center">
-                <a-col :span="12">
-                    <label>宽度：</label>
-                    <a-input-number v-model:value="state.widthValue"></a-input-number>
-                </a-col>
-                <a-col :span="12">
-                    <label>高度：</label>
-                    <a-input-number v-model:value="state.heightValue"></a-input-number>
-                </a-col>
-            </a-row>
-            <a-row>
-                <a-col span="24">
-                    <label>缩放比例：</label>
-                    <a-input-number
-                            v-model:value="state.defaultSlca"
-                            :min="0"
-                            :max="100"
-                            :formatter="value => `${value}%`"
-                            :parser="value => value.replace('%', '')"
-                    ></a-input-number>
-                </a-col>
-            </a-row>
-        </a-modal>
     </div>
 </template>
 
@@ -64,11 +35,14 @@
     import Editor from 'wangeditor'
     import {reactive, defineComponent, onMounted, getCurrentInstance, toRef, ref, onBeforeUnmount} from 'vue';
     import {btoa} from '@/util/helper';
-    import {Form, addNote,uploadimg} from '@/api/note'
+    import {Form, addNote, uploadimg} from '@/api/note'
+    import config from '@/config'
+
+    const upLoadUrl = config.get('UPLOADURL');
 
     export default defineComponent({
         name: "addNote",
-        setup() {
+        setup(props, content) {
             const ruleForm = ref(null)
             const {ctx} = getCurrentInstance() as any;
             const editor = ref();
@@ -85,6 +59,8 @@
                 noteId: null,
                 visible: false,
                 confirmLoading: false,
+                insertImgFun: (url: string) => {
+                }
             })
             const form: Form = reactive({
                 title: '',
@@ -124,22 +100,23 @@
                 }
             };
             const init = () => {
-                state.editor = instance = new Editor(editor.value);
+                instance = new Editor(editor.value);
                 instance.config = Object.assign(instance.config, {});
-                instance.config.customUploadImg = function (resultFiles: File, insertImgFn: Function) {
-                    resultFile = resultFiles;
-                    loadImg(resultFile[0]);
-                    state.visible = true
-                    // resultFiles 是 input 中选中的文件列表
-                    // insertImgFn 是获取图片 url 后，插入到编辑器的方法
-
-                    // 上传图片，返回结果，将图片插入到编辑器中
-                    // insertImgFn()
-                }
+                instance.config.customUploadImg = customUploadImg
+                state.editor = instance;
                 instance.create();
             }
-            let path=''
-            const loadImg = (file:File)=>{
+            let customUploadImg = (resultFiles: File, insertImgFn: Function) => {
+                if (resultFiles) {
+                    resultFile = resultFiles;
+                    loadImg(resultFile[0], (url: string) => {
+                        insertImgFn(upLoadUrl + url)
+                    });
+                }
+            }
+
+            let path = ''
+            const loadImg = (file: File, cb: Function) => {
                 let ready = new FileReader();
                 /*开始读取指定的Blob对象或File对象中的内容.
                 当读取操作完成时,readyState属性的值会成为DONE,如果设置了onloadend事件处理程序,则调用之.
@@ -149,21 +126,12 @@
                     let re = this.result;
                     let img = new Image();
                     img.src = String(re);
-                    img.onload = (e:any)=>{
+                    img.onload = (e: any) => {
                         path = e['path'][0]
                         state.widthValue = e['path'][0]['width']
                         state.heightValue = e['path'][0]['height']
+                        canvasDataURL(path, cb)
                     }
-                }
-            }
-            const uploadImg = () => {
-                //图片上传确认
-                try {
-                    canvasDataURL(path,()=>{
-
-                    })
-                } catch (error) {
-                    ctx.$message.error('读取文件错误')
                 }
             }
             const canvasDataURL = (path: string, cb: Function) => {
@@ -202,13 +170,18 @@
                 }
                 return new Blob([u8arr], {type: mime});
             }
-            const sendFile = (file: Blob, cb: Function) => {
-                uploadimg(file).then((res)=>{
-                    console.log(res);
+            const sendFile = (files: Blob, cb: Function) => {
+                let data = new FormData();
+                data.append("imageData", files, 'filename.jpg');
+                uploadimg(data).then((res) => {
+                    state.visible = false;
+                    cb(res.data.imgUrl)
+                }).catch((err) => {
+                    ctx.$message.error(err || '上传错误')
                 })
             }
-            const back = ()=>{
-                ctx.$router.back(-1)
+            const back = () => {
+                ctx.$router.back(-1);
             }
             const submit = () => {
                 form.content = btoa(state.editor.txt.html());
@@ -216,7 +189,14 @@
                 (ruleForm as any).value
                     .validate()
                     .then(() => {
-
+                        addNote(form).then(() => {
+                            ctx.$message.success('添加成功')
+                            ctx.$router.push({
+                                name: '/home'
+                            })
+                        }).catch((err) => {
+                            ctx.$message.error(err.msg || '提交错误')
+                        })
                     }).catch(() => {
                     ctx.$message.error('表单未填项完整')
                 })
@@ -231,7 +211,6 @@
                 ruleForm,
                 submit,
                 editor,
-                uploadImg,
                 back
             }
         }

@@ -2,7 +2,7 @@
     <div class="main-content">
         <a-row type="flex" justify="center">
             <a-col :span="12">
-                <a-row v-for="note in state.noteList" :key="note._id">
+                <a-row v-for="note in state.noteList" :key="note._id" @click="toDetail">
                     <a-col class="note-item">
                         <div class="note-item-content">
                             <div class="note-item-left">
@@ -48,8 +48,8 @@
                 getNoteList({
                     pageSize: 10,
                     page: 1
-                }).then((res: any) => {
-                    state.noteList = res;
+                }).then((res) => {
+                    state.noteList = res.data.list;
                 })
             });
             const time = (time: moment.MomentInput)=>{
@@ -59,11 +59,13 @@
             const getImgsrc = (imgList:Array<{ imgUrl: string }>):string=>{
                 return imgList.length>0? imgList[0].imgUrl:''
             }
+            const toDetail = ()=>{}
             return {
                 state,
                 time,
                 toAtob,
-                getImgsrc
+                getImgsrc,
+                toDetail
             }
         }
     });

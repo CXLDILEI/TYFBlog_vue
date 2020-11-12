@@ -2,7 +2,7 @@ import axiosObj, {AxiosInstance, AxiosRequestConfig} from "axios";
 import store from "../store/index";
 import {message} from 'ant-design-vue';
 import {toLogin} from '@/router';
-import {removeToken,getToken} from '@/util/auth';
+import {removeToken, getToken} from '@/util/auth';
 
 export const baseURL = process.env.VUE_APP_BASE_URL;
 export const uploadURL = process.env.VUE_APP_UPLOADURL;
@@ -86,10 +86,11 @@ _axios.interceptors.request.use(
 _axios.interceptors.response.use(
     function (response) {
         // errorHandle(response.data.code, response.data.msg);
-        if(response.data.code===0){
+        if (response.data.code === 0) {
             // 只返回response中的data数据
-            return Promise.resolve(response.data);
+            return Promise.resolve(response);
         }
+        errorHandle(response.data.code, response.data.msg)
         return Promise.reject(response)
     },
     function (error) {
@@ -107,7 +108,7 @@ _axios.interceptors.response.use(
 
 export function post<R>(url: string, data?: any, conf?: AxiosRequestConfig): ApiPromise<R> {
     return new Promise((resolve, reject) => {
-        _axios.request(Object.assign({}, conf, {url, method: 'post',data}))
+        _axios.request(Object.assign({}, conf, {url, method: 'post', data}))
             .then((res) => {
                 resolve(res.data);
             })
@@ -124,6 +125,19 @@ export function get<R>(url: string, params?: any, conf?: AxiosRequestConfig): Ap
                 resolve(res.data);
             })
             .catch((err: any) => {
+                reject(err.data)
+            })
+    });
+}
+
+export function upLoad<R>(url: string, data?: any, conf?: AxiosRequestConfig): ApiPromise<R> {
+    return new Promise((resolve, reject) => {
+        _axios.defaults.baseURL = process.env.VUE_APP_UPLOADURL;
+        _axios.request(Object.assign({}, conf, {url, method: 'post', data}))
+            .then((res) => {
+                resolve(res.data);
+            })
+            .catch((err) => {
                 reject(err.data)
             })
     });

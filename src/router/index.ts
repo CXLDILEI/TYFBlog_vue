@@ -23,15 +23,17 @@ router.beforeEach(async (to: _RouteLocationBase, from: _RouteLocationBase, next:
     if (to.meta.title) {
         document.title = to.meta.title;
     }
-    if (to.path.startsWith('/register') || to.path.startsWith('/login')) {
+    if (to.path.startsWith('/register') || to.path.startsWith('/login') || to.path.startsWith('/home')) {
         return next();
     }
     const accessToken = getToken();
     if (!accessToken) {
-        return toLogin();
+        if(from.path!=='/login'){
+            return toLogin();
+        }
     }
-
-    await store.dispatch('user/logged', accessToken);
+    return next();
+    // await store.dispatch('user/logged', accessToken);
 });
 
 // 登录
