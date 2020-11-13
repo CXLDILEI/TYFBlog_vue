@@ -87,6 +87,7 @@
         border-radius: 4px;
         background-color: #fff;
         box-shadow: 0 0 10px #ddd;
+        z-index: 99;
     }
 
     .form {

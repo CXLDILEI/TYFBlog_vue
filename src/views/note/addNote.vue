@@ -1,50 +1,53 @@
 <template>
     <div class="main-content">
-        <a-form :model="form" ref="ruleForm">
-            <a-row type="flex" justify="center">
-                <a-col>
-                    <a-form-item name="title" :rules="{required:true,message:'请输入标题'}">
-                        <a-input class="title-input" v-model:value="form.title"
-                                 size="large" placeholder="请输入标题"></a-input>
-                    </a-form-item>
-                </a-col>
-            </a-row>
-            <a-row type="flex" justify="center">
-                <a-col>
-                    <a-form-item name="content" :rules="{required:true,message:'请输入内容'}">
-                        <div ref="editor" v-show="!state.visible"></div>
-                        <a-input v-show="false" v-model:value="form.content"></a-input>
-                    </a-form-item>
-                </a-col>
-            </a-row>
-            <a-row class="btn-content" type="flex" justify="center" :gutter="8">
-                <a-col>
-                    <a-button @click="back">返回</a-button>
-                </a-col>
-                <a-col>
-                    <a-button type="primary" @click="submit">
-                        提交
-                    </a-button>
-                </a-col>
-            </a-row>
-        </a-form>
+        <a-spin :spinning="loading">
+            <a-form :model="form" ref="ruleForm">
+                <a-row type="flex" justify="center">
+                    <a-col>
+                        <a-form-item name="title" :rules="{required:true,message:'请输入标题'}">
+                            <a-input class="title-input" v-model:value="form.title"
+                                     size="large" placeholder="请输入标题"></a-input>
+                        </a-form-item>
+                    </a-col>
+                </a-row>
+                <a-row type="flex" justify="center">
+                    <a-col>
+                        <a-form-item name="content" :rules="{required:true,message:'请输入内容'}">
+                            <div ref="editor" v-show="!visible"></div>
+                            <a-input v-show="false" v-model:value="form.content"></a-input>
+                        </a-form-item>
+                    </a-col>
+                </a-row>
+                <a-row class="btn-content" type="flex" justify="center" :gutter="8">
+                    <a-col>
+                        <a-button @click="back">返回</a-button>
+                    </a-col>
+                    <a-col>
+                        <a-button type="primary" @click="submit" :loading="confirmLoading">
+                            提交
+                        </a-button>
+                    </a-col>
+                </a-row>
+            </a-form>
+        </a-spin>
     </div>
 </template>
 
 <script lang="ts">
     import Editor from 'wangeditor'
-    import {reactive, defineComponent, onMounted, getCurrentInstance, toRef, ref, onBeforeUnmount} from 'vue';
-    import {btoa} from '@/util/helper';
-    import {Form, addNote, uploadimg} from '@/api/note'
+    import {reactive, defineComponent, onMounted, getCurrentInstance, toRefs, ref, onBeforeUnmount} from 'vue';
+    import {btoa,atob} from '@/util/helper';
+    import {Form, addNote, uploadimg,getNoteDetail,upDataNote} from '@/api/note'
     import config from '@/config'
 
     const upLoadUrl = config.get('UPLOADURL');
 
     export default defineComponent({
         name: "addNote",
-        setup(props, content) {
+        setup() {
             const ruleForm = ref(null)
             const {ctx} = getCurrentInstance() as any;
+            const {id} = ctx.$router.currentRoute.value.query;
             const editor = ref();
             let resultFile = ref<any>(null)
             const state = reactive({
@@ -59,17 +62,30 @@
                 noteId: null,
                 visible: false,
                 confirmLoading: false,
-                insertImgFun: (url: string) => {
-                }
             })
             const form: Form = reactive({
                 title: '',
                 content: '',
-                textValue: ''
+                textValue: '',
+                id:null
             })
-            onMounted(() => {
-                init()
+            onMounted( async () => {
+                await init()
+                if(id){
+                    getData()
+                }
             })
+            const getData = ()=>{
+                state.loading= true;
+                getNoteDetail({id}).then((res)=>{
+                    form.title = res.data.title;
+                    state.editor.txt.html(atob(res.data.content))
+                }).catch((err)=>{
+                    ctx.$message.error(err.msg||'获取详情错误')
+                }).finally(()=>{
+                    state.loading= false
+                })
+            }
             let instance: any = {
                 config: {
                     showLinkImg: false,
@@ -181,7 +197,9 @@
                 })
             }
             const back = () => {
-                ctx.$router.back(-1);
+                ctx.$router.push({
+                    name: '/home'
+                });
             }
             const submit = () => {
                 form.content = btoa(state.editor.txt.html());
@@ -189,6 +207,22 @@
                 (ruleForm as any).value
                     .validate()
                     .then(() => {
+                        state.confirmLoading = true;
+                        if(id){
+                            //编辑
+                            form.id = id;
+                            upDataNote(form).then(()=>{
+                                ctx.$message.success('编辑成功')
+                                ctx.$router.replace({
+                                    name: '/home'
+                                })
+                            }).catch((err)=>{
+                                ctx.$message.error(err.msg || '提交错误')
+                            }).finally(()=>{
+                                state.confirmLoading = false;
+                            })
+                            return;
+                        }
                         addNote(form).then(() => {
                             ctx.$message.success('添加成功')
                             ctx.$router.push({
@@ -196,6 +230,8 @@
                             })
                         }).catch((err) => {
                             ctx.$message.error(err.msg || '提交错误')
+                        }).finally(()=>{
+                            state.confirmLoading = false;
                         })
                     }).catch(() => {
                     ctx.$message.error('表单未填项完整')
@@ -206,7 +242,7 @@
                 instance = null;
             });
             return {
-                state,
+                ...toRefs(state),
                 form,
                 ruleForm,
                 submit,

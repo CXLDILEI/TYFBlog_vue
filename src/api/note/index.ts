@@ -1,8 +1,9 @@
 import {ApiPromise, get, post, upLoad} from '@/api';
 
 export interface Form {
-    title: string,
-    content: string,
+    id?:string|null
+    title: string
+    content: string
     textValue: string
 }
 
@@ -26,9 +27,25 @@ export function addNote(data: Form): ApiPromise<any> {
 }
 
 /**
+ * 编辑笔记
+ * @param data
+ */
+export function upDataNote(data:Form):ApiPromise<any> {
+    return post('/note/upDataNote',data)
+}
+
+/**
+ * 获取笔记详情
+ * @param params
+ */
+export function getNoteDetail(params: { id: string }): ApiPromise<any> {
+    return get('/note/getNoteDetail', params)
+}
+
+/**
  * 笔记上传图片
  * @param file
  */
-export function uploadimg(file: Blob|FormData): ApiPromise<any> {
+export function uploadimg(file: Blob | FormData): ApiPromise<any> {
     return upLoad('/note/uploadimg', file, {headers: {'content-type': 'application/x-www-form-urlencoded'}})
 }
