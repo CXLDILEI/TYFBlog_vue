@@ -7,7 +7,7 @@
                         <a-col class="note-item">
                             <div class="note-item-content">
                                 <div class="note-item-left">
-                                    <p class="time"><span>发布与:</span><span>{{time(note.createTime)}}</span></p>
+                                    <p class="time"><span>发布于:</span><span>{{time(note.createTime)}}</span></p>
                                     <a class="note-item-title">{{note.title}}</a>
                                     <p class="note-item-left-content">
                                         {{toAtob(note.textValue)}}

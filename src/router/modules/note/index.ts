@@ -8,7 +8,8 @@ const router = {
             name: '/addNote',
             component: () => import('@/views/note/addNote.vue'),
             meta: {
-                title: '新增笔记'
+                title: '新增笔记',
+                verification:true
             }
         },
         {
@@ -24,7 +25,8 @@ const router = {
             name: '/editeNote',
             component: () => import('@/views/note/addNote.vue'),
             meta: {
-                title: '编辑笔记'
+                title: '编辑笔记',
+                verification:true
             }
         }
     ]

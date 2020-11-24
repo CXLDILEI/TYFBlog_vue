@@ -30,7 +30,7 @@
 <script lang="ts">
     import {reactive, defineComponent, toRefs, getCurrentInstance, ref} from 'vue';
     import {LoginInfo, login} from '@/api/auth';
-    import {setToken} from '@/util/auth'
+    import {setToken} from '@/util/auth';
 
     export default defineComponent({
         name: "login",
@@ -50,8 +50,10 @@
                         state.loading = true;
                         login(value).then((res) => {
                             setToken(res.data.token);
+                            ctx.$store.commit('user/setToken',res.data.token);
+                            ctx.$store.commit('user/setInfo',res.data.userInfo);
                             ctx.$router.push({
-                                name:'/home'
+                                name: '/home'
                             });
                         }).catch((err) => {
                             ctx.$message.error(err.msg || '登录失败')

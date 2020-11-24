@@ -16,9 +16,15 @@
                 <div class="userInfo-ctx">
                     <a-row type="flex" :gutter="8">
                         <a-col>
-                            <a-avatar size="large" class="avatar" @click="authMenus">
-                                登录
-                            </a-avatar>
+                            <a-popover class="avatar">
+                                <template #content>
+                                    <a-button type="link" @click="loginOut">退出</a-button>
+                                </template>
+                                <a-avatar size="large" @click="authMenus">
+                                    <span v-if="userInfo">{{userInfo.userName}}</span>
+                                    <span v-else>登录</span>
+                                </a-avatar>
+                            </a-popover>
                         </a-col>
                     </a-row>
                 </div>
@@ -32,13 +38,16 @@
 </template>
 
 <script lang="ts">
-    import {reactive, ref, defineComponent, getCurrentInstance} from 'vue';
+    import {reactive, ref, defineComponent, getCurrentInstance,onMounted,computed} from 'vue';
+    import {removeToken} from '@/util/auth';
+    import { mapState,useStore } from "vuex";
 
     export default defineComponent({
         name: 'MainLayout',
-        setup(props, context) {
+        setup() {
             const selectedKeys = ref<String>('1');
             const {ctx} = getCurrentInstance() as any;
+            const store = useStore() as any;
             const componentList = reactive([
                 {
                     name: '首页',
@@ -51,12 +60,23 @@
                     key: '2'
                 }
             ]);
+            const userInfo = computed(()=>{
+                return store.state.user.info
+            })
             const toMenu = ((name: string) => {
                 ctx.$router.push({
                     name
                 })
             })
             const authMenus = () => {
+                if(!userInfo){
+                    ctx.$router.push({
+                        name: '/login'
+                    })
+                }
+            }
+            const loginOut = () => {
+                removeToken()
                 ctx.$router.push({
                     name: '/login'
                 })
@@ -65,7 +85,9 @@
                 selectedKeys,
                 componentList,
                 toMenu,
-                authMenus
+                authMenus,
+                loginOut,
+                userInfo
             };
         }
     });
@@ -97,7 +119,7 @@
 
     .userInfo-ctx {
         position: absolute;
-        right: 0;
+        right: 70px;
         top: 0;
     }
 

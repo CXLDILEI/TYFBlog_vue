@@ -5,11 +5,24 @@ export interface ILoginInfoState {
     token?: string;
     info?: unknown;
 }
-
+export interface UserInfo {
+    attachmentNote: Array<unknown>
+    avatar: string
+    createTime: string
+    sex: number
+    userName: string
+    _id: string
+}
 const state = {
     token: ''
 }
 const mutations = {
+    setToken(state: ILoginInfoState, token: string) {
+        state.token = token;
+    },
+    setInfo(state: ILoginInfoState, info: UserInfo) {
+        state.info = info;
+    },
 }
 const actions= {
 }

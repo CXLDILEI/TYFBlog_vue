@@ -70,7 +70,7 @@ _axios = axiosObj.create(defaultConfig);
 // 请求拦截器
 _axios.interceptors.request.use(
     function (config) {
-        // 从vuex里获取token
+        // 从cookie里获取token
         const token = getToken();
         // 如果token存在就在请求头里添加
         token && (config.headers.token = token);
