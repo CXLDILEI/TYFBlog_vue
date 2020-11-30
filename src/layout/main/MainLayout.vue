@@ -38,59 +38,61 @@
 </template>
 
 <script lang="ts">
-    import {reactive, ref, defineComponent, getCurrentInstance,onMounted,computed} from 'vue';
-    import {removeToken} from '@/util/auth';
-    import { mapState,useStore } from "vuex";
+  import {reactive, ref, defineComponent, getCurrentInstance, onMounted, computed} from 'vue';
+  import {removeToken} from '@/util/auth';
+  import {useStore} from 'vuex';
+  import {useRouter} from 'vue-router';
 
-    export default defineComponent({
-        name: 'MainLayout',
-        setup() {
-            const selectedKeys = ref<String>('1');
-            const {ctx} = getCurrentInstance() as any;
-            const store = useStore() as any;
-            const componentList = reactive([
-                {
-                    name: '首页',
-                    component: '/home',
-                    key: '1'
-                },
-                {
-                    name: '新笔记',
-                    component: '/addNote',
-                    key: '2'
-                }
-            ]);
-            const userInfo = computed(()=>{
-                return store.state.user.info
-            })
-            const toMenu = ((name: string) => {
-                ctx.$router.push({
-                    name
-                })
-            })
-            const authMenus = () => {
-                if(!userInfo){
-                    ctx.$router.push({
-                        name: '/login'
-                    })
-                }
-            }
-            const loginOut = () => {
-                removeToken()
-                ctx.$router.push({
-                    name: '/login'
-                })
-            }
-            return {
-                selectedKeys,
-                componentList,
-                toMenu,
-                authMenus,
-                loginOut,
-                userInfo
-            };
+  export default defineComponent({
+    name: 'MainLayout',
+    setup() {
+      const selectedKeys = ref<String>('1');
+      const {ctx} = getCurrentInstance() as any;
+      const {push} = useRouter();
+      const store = useStore() as any;
+      const componentList = reactive([
+        {
+          name: '首页',
+          component: '/home',
+          key: '1'
+        },
+        {
+          name: '新笔记',
+          component: '/addNote',
+          key: '2'
         }
-    });
+      ]);
+      const userInfo = computed(() => {
+        return store.state.user.info;
+      });
+      const toMenu = ((name: string) => {
+        push({
+          name
+        });
+      });
+      const authMenus = () => {
+        if (!userInfo) {
+          push({
+            name: '/login'
+          });
+        }
+      };
+      const loginOut = () => {
+        removeToken();
+        push({
+          name: '/login'
+        });
+      };
+      return {
+        selectedKeys,
+        componentList,
+        toMenu,
+        authMenus,
+        loginOut,
+        userInfo
+      };
+    }
+  });
 </script>
 
 <style scoped>

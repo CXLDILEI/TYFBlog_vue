@@ -31,11 +31,13 @@
     import {reactive, defineComponent, toRefs, getCurrentInstance, ref} from 'vue';
     import {LoginInfo, login} from '@/api/auth';
     import {setToken} from '@/util/auth';
+    import {useRouter} from 'vue-router';
 
     export default defineComponent({
         name: "login",
         setup() {
             const {ctx} = getCurrentInstance() as any;
+          const {push} = useRouter();
             const formRef = ref(null)
             const state = reactive({
                 loading: false,
@@ -52,7 +54,7 @@
                             setToken(res.data.token);
                             ctx.$store.commit('user/setToken',res.data.token);
                             ctx.$store.commit('user/setInfo',res.data.userInfo);
-                            ctx.$router.push({
+                          push({
                                 name: '/home'
                             });
                         }).catch((err) => {

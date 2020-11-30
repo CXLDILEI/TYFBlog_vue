@@ -6,24 +6,26 @@
 </template>
 
 <script lang="ts">
-    import {defineComponent, getCurrentInstance, computed, reactive, toRefs} from 'vue';
-    import router from '@/router'
+  import {defineComponent, getCurrentInstance, computed, reactive, toRefs} from 'vue';
+  import router from '@/router';
+  import {useRouter} from 'vue-router';
 
-    export default defineComponent({
-        name: "PublicLayout",
-        setup() {
-            const {ctx} = getCurrentInstance() as any;
-            const {meta} = router.currentRoute.value;
-            const state = reactive({
-                showBG: computed(() => {
-                    return !meta.hideBG
-                })
-            })
-            return {
-                ...toRefs(state),
-            }
-        }
-    })
+  export default defineComponent({
+    name: 'PublicLayout',
+    setup() {
+      const {ctx} = getCurrentInstance() as any;
+      const {currentRoute} = useRouter();
+      const meta = currentRoute.value.meta;
+      const state = reactive({
+        showBG: computed(() => {
+          return !meta.hideBG;
+        })
+      });
+      return {
+        ...toRefs(state),
+      };
+    }
+  });
 </script>
 
 <style scoped>

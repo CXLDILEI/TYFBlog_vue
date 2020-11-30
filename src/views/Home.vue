@@ -26,68 +26,70 @@
 </template>
 
 <script lang="ts">
-    import {getNoteList} from '@/api/note';
-    import {reactive, defineComponent, onMounted, getCurrentInstance,toRefs} from 'vue';
-    import moment from 'moment'
-    import {atob} from '@/util/helper'
+  import {getNoteList} from '@/api/note';
+  import {reactive, defineComponent, onMounted, getCurrentInstance, toRefs} from 'vue';
+  import moment from 'moment';
+  import {atob} from '@/util/helper';
+  import {useRouter} from 'vue-router';
 
-    interface NoteItem {
-        content: string
-        createTime: string
-        imgList: Array<string>
-        textValue: string
-        title: string
-        user: { avatar: string, _id: string },
-        _id: string
+  interface NoteItem {
+    content: string
+    createTime: string
+    imgList: Array<string>
+    textValue: string
+    title: string
+    user: { avatar: string, _id: string },
+    _id: string
+  }
+
+  export default defineComponent({
+    setup() {
+      const {ctx} = getCurrentInstance() as any;
+      const {push} = useRouter();
+      let state = reactive({
+        noteList: [] as Array<NoteItem>,
+        loading: false
+      });
+      onMounted(() => {
+        getData();
+      });
+      const getData = () => {
+        state.loading = true;
+        getNoteList({
+          pageSize: 10,
+          page: 1
+        }).then((res) => {
+          state.noteList = res.data.list;
+        }).catch((err) => {
+          ctx.$message.error(err.msg || '获取列表错误');
+        }).finally(() => {
+          state.loading = false;
+        });
+      };
+      const time = (time: moment.MomentInput) => {
+        return moment(time).format('YYYY-MM-DD');
+      };
+      const toAtob = (str: string): string => atob(str).replace(/&nbsp;/g, '');
+      const getImgsrc = (imgList: Array<{ imgUrl: string }>): string => {
+        return imgList.length > 0 ? imgList[0].imgUrl : '';
+      };
+      const toDetail = (data: NoteItem) => {
+        push({
+          name: '/noteDetail',
+          query: {
+            id: data._id
+          }
+        });
+      };
+      return {
+        ...toRefs(state),
+        time,
+        toAtob,
+        getImgsrc,
+        toDetail
+      };
     }
-
-    export default defineComponent({
-        setup() {
-            const {ctx} = getCurrentInstance() as any;
-            let state = reactive({
-                noteList: [] as Array<NoteItem>,
-                loading:false
-            })
-            onMounted(() => {
-                getData()
-            });
-            const getData = ()=>{
-                state.loading = true;
-                getNoteList({
-                    pageSize: 10,
-                    page: 1
-                }).then((res) => {
-                    state.noteList = res.data.list;
-                }).catch((err)=>{
-                    ctx.$message.error(err.msg||'获取列表错误')
-                }).finally(()=>{
-                    state.loading = false;
-                })
-            }
-            const time = (time: moment.MomentInput) => {
-                return moment(time).format('YYYY-MM-DD')
-            }
-            const toAtob = (str: string): string => atob(str).replace(/&nbsp;/g, '')
-            const getImgsrc = (imgList: Array<{ imgUrl: string }>): string => {
-                return imgList.length > 0 ? imgList[0].imgUrl : ''
-            }
-            const toDetail = (data: NoteItem) => {
-                ctx.$router.push({
-                    name: '/noteDetail',
-                    query: {
-                        id: data._id
-                    }
-                })
-            }
-            return {
-                ...toRefs(state),
-                time,
-                toAtob,
-                getImgsrc,
-                toDetail
-            }
-        }
-    });
+  });
 </script>
 <style scoped>
     .note-item {
