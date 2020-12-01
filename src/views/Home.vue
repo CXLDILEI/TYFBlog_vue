@@ -31,6 +31,7 @@
   import moment from 'moment';
   import {atob} from '@/util/helper';
   import {useRouter} from 'vue-router';
+  import {message} from 'ant-design-vue';
 
   interface NoteItem {
     content: string
@@ -61,7 +62,7 @@
         }).then((res) => {
           state.noteList = res.data.list;
         }).catch((err) => {
-          ctx.$message.error(err.msg || '获取列表错误');
+          message.error(err.msg || '获取列表错误');
         }).finally(() => {
           state.loading = false;
         });

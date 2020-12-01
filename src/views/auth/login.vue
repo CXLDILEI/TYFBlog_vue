@@ -32,13 +32,15 @@
     import {LoginInfo, login} from '@/api/auth';
     import {setToken} from '@/util/auth';
     import {useRouter} from 'vue-router';
+    import {message} from 'ant-design-vue';
+    import {useStore} from 'vuex'
 
     export default defineComponent({
         name: "login",
         setup() {
-            const {ctx} = getCurrentInstance() as any;
-          const {push} = useRouter();
-            const formRef = ref(null)
+            const {push} = useRouter();
+            const formRef = ref(null);
+            const store = useStore();
             const state = reactive({
                 loading: false,
                 ruleForm: {
@@ -52,18 +54,18 @@
                         state.loading = true;
                         login(value).then((res) => {
                             setToken(res.data.token);
-                            ctx.$store.commit('user/setToken',res.data.token);
-                            ctx.$store.commit('user/setInfo',res.data.userInfo);
-                          push({
+                            store.commit('user/setToken', res.data.token);
+                            store.commit('user/setInfo', res.data.userInfo);
+                            push({
                                 name: '/home'
                             });
                         }).catch((err) => {
-                            ctx.$message.error(err.msg || '登录失败')
+                            message.error(err || err.msg || '登录失败')
                         }).finally(() => {
                             state.loading = false;
                         })
                     }).catch(() => {
-                    ctx.$message.error('表单未填项完整')
+                    message.error('表单未填项完整')
                 })
             }
             return {

@@ -27,64 +27,65 @@
 </template>
 
 <script lang="ts">
-  import {defineComponent, onMounted, getCurrentInstance, toRefs, reactive} from 'vue';
-  import {getNoteDetail} from '@/api/note';
-  import {atob} from '@/util/helper';
-  import {DeleteOutlined, EditOutlined} from '@ant-design/icons-vue';
-  import {useRouter} from 'vue-router';
+    import {defineComponent, onMounted, getCurrentInstance, toRefs, reactive} from 'vue';
+    import {getNoteDetail} from '@/api/note';
+    import {atob} from '@/util/helper';
+    import {DeleteOutlined, EditOutlined} from '@ant-design/icons-vue';
+    import {useRouter} from 'vue-router';
+    import {message} from 'ant-design-vue';
 
-  interface NoteData {
-    content: string
-    createTime: string
-    imgList: Array<string>
-    textValue: string
-    title: string
-    user: { avatar: string, _id: string, userName: string }
-    _id: string
-  }
-
-  export default defineComponent({
-    name: 'noteDetailBase',
-    components: {
-      DeleteOutlined,
-      EditOutlined
-    },
-    setup() {
-      const {ctx} = getCurrentInstance() as any;
-      const {push, currentRoute} = useRouter();
-      const id = String(currentRoute.value.query.id);
-      const state = reactive({
-        data: null as NoteData | null,
-        atob: atob,
-        loading: false
-      });
-      onMounted(() => {
-        getData();
-      });
-      const getData = () => {
-        state.loading = true;
-        getNoteDetail({id}).then((res) => {
-          state.data = res.data;
-        }).catch((err) => {
-          ctx.$message.error(err.msg || '获取详情错误');
-        }).finally(() => {
-          state.loading = false;
-        });
-      };
-      const toEdit = () => {
-        push({
-          name: '/editeNote',
-          query: {
-            id
-          }
-        });
-      };
-      return {
-        ...toRefs(state),
-        toEdit
-      };
+    interface NoteData {
+        content: string
+        createTime: string
+        imgList: Array<string>
+        textValue: string
+        title: string
+        user: { avatar: string, _id: string, userName: string }
+        _id: string
     }
-  });
+
+    export default defineComponent({
+        name: 'noteDetailBase',
+        components: {
+            DeleteOutlined,
+            EditOutlined
+        },
+        setup() {
+            const {ctx} = getCurrentInstance() as any;
+            const {push, currentRoute} = useRouter();
+            const id = String(currentRoute.value.query.id);
+            const state = reactive({
+                data: null as NoteData | null,
+                atob: atob,
+                loading: false
+            });
+            onMounted(() => {
+                getData();
+            });
+            const getData = () => {
+                state.loading = true;
+                getNoteDetail({id}).then((res) => {
+                    state.data = res.data;
+                }).catch((err) => {
+                    message.error(err.msg || '获取详情错误');
+                }).finally(() => {
+                    state.loading = false;
+                });
+            };
+            const toEdit = () => {
+                push({
+                    name: '/editeNote',
+                    query: {
+                        id
+                    }
+                });
+            };
+            return {
+                ...toRefs(state),
+                toEdit
+            };
+        }
+    });
 </script>
 
 <style scoped>
