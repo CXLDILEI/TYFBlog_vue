@@ -1,10 +1,10 @@
 import {ApiPromise, get, post, upLoad} from '@/api';
 
 export interface Form {
-    id?:string|null
-    title: string
-    content: string
-    textValue: string
+  id?: string | null
+  title: string
+  content: string
+  textValue: string
 }
 
 /**
@@ -12,10 +12,10 @@ export interface Form {
  * @param params
  */
 export function getNoteList(params: {
-    pageSize: number,
-    page: number
+  pageSize: number,
+  page: number
 }): ApiPromise<any> {
-    return get('/note/getNoteList', params);
+  return get('/note/getNoteList', params);
 }
 
 /**
@@ -23,15 +23,15 @@ export function getNoteList(params: {
  * @param data
  */
 export function addNote(data: Form): ApiPromise<any> {
-    return post('/note/addNote', data)
+  return post('/note/addNote', data);
 }
 
 /**
  * 编辑笔记
  * @param data
  */
-export function upDataNote(data:Form):ApiPromise<any> {
-    return post('/note/upDataNote',data)
+export function upDataNote(data: Form): ApiPromise<any> {
+  return post('/note/upDataNote', data);
 }
 
 /**
@@ -39,7 +39,7 @@ export function upDataNote(data:Form):ApiPromise<any> {
  * @param params
  */
 export function getNoteDetail(params: { id: string }): ApiPromise<any> {
-    return get('/note/getNoteDetail', params)
+  return get('/note/getNoteDetail', params);
 }
 
 /**
@@ -47,5 +47,47 @@ export function getNoteDetail(params: { id: string }): ApiPromise<any> {
  * @param file
  */
 export function uploadimg(file: Blob | FormData): ApiPromise<any> {
-    return upLoad('/note/uploadimg', file, {headers: {'content-type': 'application/x-www-form-urlencoded'}})
+  return upLoad('/note/uploadimg', file, {headers: {'content-type': 'application/x-www-form-urlencoded'}});
+}
+
+/**
+ * 获取笔记列表
+ * @param params
+ */
+export function getComment(params: { noteId: string, replyPageSize: number, pageData: any }): ApiPromise<[{ data: Array<any>, totalPage: number }]> {
+  return get('/comment/getComment', params);
+}
+
+/**
+ * 增加评论
+ * @param data
+ */
+export function addComment(data:{
+  noteId: string,
+  content: string,
+}):ApiPromise<any>{
+  return post('/comment/addComment',data);
+}
+/**
+ * 回复列表
+ * @param params
+ */
+export function moreReply(params: { commentId: string, pageData: any }): ApiPromise<any> {
+  return get('/comment/getMoreReply', params);
+}
+
+/**
+ * 点赞
+ * @param data
+ */
+export function addCommentLike(data:{type:number,id:string}):ApiPromise<any> {
+  return post('/comment/addCommentLike',data);
+}
+
+export function addReply(data: {
+  commentId: string,
+  toUserId: string,
+  content: string
+}): ApiPromise<any> {
+  return post('/comment/addReply', data);
 }

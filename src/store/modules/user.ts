@@ -1,10 +1,11 @@
-import { Module, MutationTree, ActionTree, ActionContext, GetterTree } from 'vuex';
+import {Module} from 'vuex';
 import {RootState} from '@/store'
 
 export interface ILoginInfoState {
     token?: string;
     info?: unknown;
 }
+
 export interface UserInfo {
     attachmentNote: Array<unknown>
     avatar: string
@@ -13,6 +14,7 @@ export interface UserInfo {
     userName: string
     _id: string
 }
+
 const state = {
     token: ''
 }
@@ -24,10 +26,13 @@ const mutations = {
         state.info = info;
     },
 }
-const actions= {
+const actions = {
+    setUserInfo() {
+
+    }
 }
 
-const user: Module<ILoginInfoState,RootState> = {
+const user: Module<ILoginInfoState, RootState> = {
     namespaced: true,
     state,
     mutations,

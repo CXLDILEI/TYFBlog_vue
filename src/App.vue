@@ -3,7 +3,18 @@
     <router-view/>
   </div>
 </template>
-
+<script lang="ts">
+  import {defineComponent,onMounted} from 'vue';
+  import {useStore} from 'vuex';
+  export default defineComponent({
+    setup(){
+      const store = useStore();
+      onMounted(()=>{
+        store.dispatch('/user/setUserInfo')
+      })
+    }
+  })
+</script>
 <style>
 #app {
   font-family: Lato, "PingFang SC", "Microsoft YaHei", sans-serif !important;

@@ -12,3 +12,10 @@ export interface LoginInfo {
 export function login(data: LoginInfo): ApiPromise<any> {
     return post('/user/login', data);
 }
+
+/**
+ * 获取用户信息
+ */
+export function getUserInfo(): ApiPromise<any> {
+    return get('getUserById');
+}

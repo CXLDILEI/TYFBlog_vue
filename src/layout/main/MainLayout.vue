@@ -20,9 +20,9 @@
                                 <template #content>
                                     <a-button type="link" @click="loginOut">退出</a-button>
                                 </template>
-                                <a-avatar size="large" @click="authMenus">
+                                <a-avatar size="large">
                                     <span v-if="userInfo">{{userInfo.userName}}</span>
-                                    <span v-else>登录</span>
+                                    <span v-else @click="authMenus">登录</span>
                                 </a-avatar>
                             </a-popover>
                         </a-col>
@@ -38,61 +38,60 @@
 </template>
 
 <script lang="ts">
-  import {reactive, ref, defineComponent, getCurrentInstance, onMounted, computed} from 'vue';
-  import {removeToken} from '@/util/auth';
-  import {useStore} from 'vuex';
-  import {useRouter} from 'vue-router';
+    import {reactive, ref, defineComponent, computed} from 'vue';
+    import {removeToken} from '@/util/auth';
+    import {useStore} from 'vuex';
+    import {useRouter} from 'vue-router';
 
-  export default defineComponent({
-    name: 'MainLayout',
-    setup() {
-      const selectedKeys = ref<String>('1');
-      const {ctx} = getCurrentInstance() as any;
-      const {push} = useRouter();
-      const store = useStore() as any;
-      const componentList = reactive([
-        {
-          name: '首页',
-          component: '/home',
-          key: '1'
-        },
-        {
-          name: '新笔记',
-          component: '/addNote',
-          key: '2'
+    export default defineComponent({
+        name: 'MainLayout',
+        setup() {
+            const selectedKeys = ref<String>('1');
+            const {push} = useRouter();
+            const store = useStore() as any;
+            const componentList = reactive([
+                {
+                    name: '首页',
+                    component: '/home',
+                    key: '1'
+                },
+                {
+                    name: '新笔记',
+                    component: '/addNote',
+                    key: '2'
+                }
+            ]);
+            const userInfo = computed(() => {
+                return store.state.user.info;
+            });
+            const toMenu = ((name: string) => {
+                push({
+                    name
+                });
+            });
+            const authMenus = () => {
+                if (!userInfo.value) {
+                    push({
+                        name: '/login'
+                    });
+                }
+            };
+            const loginOut = () => {
+                removeToken();
+                push({
+                    name: '/login'
+                });
+            };
+            return {
+                selectedKeys,
+                componentList,
+                toMenu,
+                authMenus,
+                loginOut,
+                userInfo
+            };
         }
-      ]);
-      const userInfo = computed(() => {
-        return store.state.user.info;
-      });
-      const toMenu = ((name: string) => {
-        push({
-          name
-        });
-      });
-      const authMenus = () => {
-        if (!userInfo) {
-          push({
-            name: '/login'
-          });
-        }
-      };
-      const loginOut = () => {
-        removeToken();
-        push({
-          name: '/login'
-        });
-      };
-      return {
-        selectedKeys,
-        componentList,
-        toMenu,
-        authMenus,
-        loginOut,
-        userInfo
-      };
-    }
-  });
+    });
 </script>
 
 <style scoped>
