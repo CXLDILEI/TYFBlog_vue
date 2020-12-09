@@ -45,7 +45,6 @@
 
   export default defineComponent({
     setup() {
-      const {ctx} = getCurrentInstance() as any;
       const {push} = useRouter();
       let state = reactive({
         noteList: [] as Array<NoteItem>,

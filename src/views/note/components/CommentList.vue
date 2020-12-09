@@ -204,15 +204,15 @@
       const getCommentData = (replyPageSize = 2, getMore = false) => {
         state.loading = true;
         getComment({noteId: id, replyPageSize: replyPageSize, pageData: state.pageData}).then((res: any) => {
-          // res.data.forEach((item:any)=>{
-          //   item.createTime = this.$global.initTime(item.createTime);
-          //   item.user.avatar = this.$global.getAvatar(item.user.avatar)
-          //   item.replyList.data.forEach(value=>{
-          //     value.createTime = this.$global.initTime(value.createTime)
-          //     value.from.avatar = this.$global.getAvatar(value.from.avatar)
-          //   })
-          //   item.isSelect = false
-          // })
+          res.data.forEach((item:any)=>{
+            // item.createTime = this.$global.initTime(item.createTime);
+            // item.user.avatar = this.$global.getAvatar(item.user.avatar)
+            // item.replyList.data.forEach((value:any)=>{
+            //   value.createTime = this.$global.initTime(value.createTime)
+            //   value.from.avatar = this.$global.getAvatar(value.from.avatar)
+            // })
+            item.isSelect = false
+          })
           if (getMore) {
             const list: Array<any> = res.data || [];
             state.commentList.push(...list);
