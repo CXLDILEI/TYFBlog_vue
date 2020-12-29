@@ -17,5 +17,5 @@ export function login(data: LoginInfo): ApiPromise<any> {
  * 获取用户信息
  */
 export function getUserInfo(): ApiPromise<any> {
-    return get('getUserById');
+    return get('/user/authInfo');
 }

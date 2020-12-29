@@ -60,7 +60,7 @@
                                 name: '/home'
                             });
                         }).catch((err) => {
-                            message.error(err || err.msg || '登录失败')
+                            message.error(err.msg || '登录失败')
                         }).finally(() => {
                             state.loading = false;
                         })

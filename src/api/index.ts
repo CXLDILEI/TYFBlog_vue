@@ -42,16 +42,17 @@ const errorHandle = (status: number, msg: string) => {
     switch (status) {
         // 401: 未登录状态，跳转登录页
         case 401:
+            // 如果不需要自动刷新token，可以在这里移除本地存储中的token，跳转登录页
             removeToken();
-            // 页面刷新
-            parent.location.reload();
+            toLogin();
+
             return;
             break;
         // 403 token过期
         case 403:
-            // 如果不需要自动刷新token，可以在这里移除本地存储中的token，跳转登录页
             removeToken();
-            toLogin()
+            // 页面刷新
+            parent.location.reload();
             return;
             break;
         // 404请求不存在
@@ -73,7 +74,7 @@ _axios.interceptors.request.use(
         // 从cookie里获取token
         const token = getToken();
         // 如果token存在就在请求头里添加
-        token && (config.headers.token = token);
+        token && (config.headers.Authorization = token);
         return config;
     },
     function (error) {
@@ -85,18 +86,16 @@ _axios.interceptors.request.use(
 // 响应拦截器
 _axios.interceptors.response.use(
     function (response) {
-        // errorHandle(response.data.code, response.data.msg);
         if (response.data.code === 0) {
             // 只返回response中的data数据
             return Promise.resolve(response);
         }
-        errorHandle(response.data.code, response.data.msg)
-        return Promise.reject(response)
+        return Promise.reject(response||'操作失败')
     },
     function (error) {
         if (error) {
             // 请求已发出，但不在2xx范围内
-            errorHandle(error.status, error.data.msg);
+            errorHandle(error.response.status, error.response.msg);
             return Promise.reject(error);
         } else {
             // 断网

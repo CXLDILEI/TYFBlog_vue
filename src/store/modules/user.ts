@@ -1,5 +1,6 @@
 import {Module} from 'vuex';
-import {RootState} from '@/store'
+import {RootState} from '@/store';
+import {getUserInfo} from '@/api/auth'
 
 export interface ILoginInfoState {
     token?: string;
@@ -27,8 +28,10 @@ const mutations = {
     },
 }
 const actions = {
-    setUserInfo() {
-
+    setUserInfo(ctx: { commit: (arg0: string, arg1: any) => void; }) {
+        getUserInfo().then((res) => {
+            ctx.commit('setInfo', res.data.userInfo)
+        })
     }
 }
 

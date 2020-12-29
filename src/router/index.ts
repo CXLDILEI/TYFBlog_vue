@@ -1,6 +1,5 @@
 import {createRouter, createWebHistory, RouteRecordRaw, _RouteLocationBase} from 'vue-router';
-import {getToken} from '@/util/auth'
-import store from '@/store'
+import {getToken} from '@/util/auth';
 
 const requireRouter = (require as any).context(
     // 其组件目录的相对路径
