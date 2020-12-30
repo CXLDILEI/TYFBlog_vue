@@ -24,7 +24,7 @@
                     <a-card>
                         <h4>评论</h4>
                         <!-- 评论列表 -->
-                        <CommentList></CommentList>
+<!--                        <CommentList></CommentList>-->
                     </a-card>
                 </a-col>
             </a-row>
@@ -72,7 +72,7 @@
       const getData = () => {
         state.loading = true;
         getNoteDetail({id}).then((res) => {
-          state.data = res.data;
+          state.data = res.data.data;
         }).catch((err) => {
           message.error(err.msg || '获取详情错误');
         }).finally(() => {

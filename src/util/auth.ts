@@ -3,7 +3,7 @@ import Cookies from 'js-cookie';
 const TokenKey = 'TYF_BLOG';
 
 export function getToken(): string {
-    return `Bearer ${Cookies.get(TokenKey)}` || '';
+    return Cookies.get(TokenKey) || '';
 }
 
 export function setToken(token: string) {

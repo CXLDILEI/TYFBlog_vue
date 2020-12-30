@@ -72,7 +72,7 @@ _axios = axiosObj.create(defaultConfig);
 _axios.interceptors.request.use(
     function (config) {
         // 从cookie里获取token
-        const token = getToken();
+        const token = getToken() ? `Bearer ${getToken()}` : undefined;
         // 如果token存在就在请求头里添加
         token && (config.headers.Authorization = token);
         return config;
@@ -90,7 +90,7 @@ _axios.interceptors.response.use(
             // 只返回response中的data数据
             return Promise.resolve(response);
         }
-        return Promise.reject(response||'操作失败')
+        return Promise.reject(response || '操作失败')
     },
     function (error) {
         if (error) {

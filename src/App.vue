@@ -12,8 +12,7 @@
         setup() {
             const store = useStore();
             onMounted(() => {
-                //如果本地存有token
-                console.log(getToken());
+                //如果本地存有token重新设置用户信息；
                 if (getToken()) {
                     store.dispatch('user/setUserInfo');
                 }
