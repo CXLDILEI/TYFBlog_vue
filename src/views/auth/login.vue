@@ -65,7 +65,7 @@
                             state.loading = false;
                         })
                     }).catch(() => {
-                    message.error('表单未填项完整')
+                    message.error('请填写用户名和密码');
                 })
             }
             return {
