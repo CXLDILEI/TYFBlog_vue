@@ -73,7 +73,7 @@
                 </div>
                 <!-- 回复列表 -->
                 <div v-if="item.replyList" class="reply-list">
-                    <div class="comment-list-item reply-item" v-for="(value,idx) in item.replyList.data" :key="idx">
+                    <div class="comment-list-item reply-item" v-for="(value,idx) in item.replyList.list" :key="idx">
                         <div class="comment-list-item-top">
                             <div class="comment-list-item-top-header">
                                 <div class="avatar">
@@ -140,10 +140,10 @@
                         </div>
                     </div>
                     <p class="more-bottom" @click="getMoreReply(item._id,i)"
-                       v-if="item.replyList.replyCount>2&&item.replyList.replyCount<=5&&!item.isSelect">查看其他
-                        {{item.replyList.replyCount-2}} 条回复</p>
-                    <p class="more-bottom" @click="getAllReply(item._id,i)" v-if="item.replyList.replyCount>5">查看全部
-                        {{item.replyList.replyCount}} 条回复</p>
+                       v-if="item.replyList.total>2&&item.replyList.total<=5&&!item.isSelect">查看其他
+                        {{item.replyList.total-2}} 条回复</p>
+                    <p class="more-bottom" @click="getAllReply(item._id,i)" v-if="item.replyList.total>5">查看全部
+                        {{item.replyList.total}} 条回复</p>
                 </div>
             </div>
         </div>
@@ -160,211 +160,219 @@
 </template>
 
 <script lang="ts">
-  import {defineComponent, onMounted, getCurrentInstance, toRefs, reactive, computed} from 'vue';
-  import {getComment, addReply, moreReply, addCommentLike, addComment} from '@/api/note';
-  import {useRouter} from 'vue-router';
-  import {message} from 'ant-design-vue';
-  import {useStore} from 'vuex';
+    import {defineComponent, onMounted, getCurrentInstance, toRefs, reactive, computed} from 'vue';
+    import {getComment, addReply, moreReply, addCommentLike, addComment} from '@/api/note';
+    import {useRouter} from 'vue-router';
+    import {message} from 'ant-design-vue';
+    import {useStore} from 'vuex';
 
-  export default defineComponent({
-    name: 'CommentList',
-    setup() {
-      const {currentRoute} = useRouter();
-      const id = String(currentRoute.value.query.id);
-      const store = useStore() as any;
-      const state = reactive({
-        id: null,
-        noteData: {},
-        user: {},
-        comment: '',
-        commentList: [] as any,
-        replyContent: '',
-        showReply: false,
-        replyIndex: 0,
-        showCommentReply: false,
-        commentReplyIndex: 0,
-        commentReplyId: '',
-        isHover: false,
-        hoverId: null,
-        pageData: {
-          page: 1,
-          pageSize: 10
-        },
-        showAllComment: false,
-        commentId: '',
-        hasMore: false,
-        loading: false
-      });
-      onMounted(() => {
-        getCommentData();
-      });
-      const isAuthor = (item: { _id: string }) => {
-        return store.state.user.info === item._id;
-      };
-      const getCommentData = (replyPageSize = 2, getMore = false) => {
-        state.loading = true;
-        getComment({noteId: id, replyPageSize: replyPageSize, pageData: state.pageData}).then((res: any) => {
-          res.data.forEach((item:any)=>{
-            // item.createTime = this.$global.initTime(item.createTime);
-            // item.user.avatar = this.$global.getAvatar(item.user.avatar)
-            // item.replyList.data.forEach((value:any)=>{
-            //   value.createTime = this.$global.initTime(value.createTime)
-            //   value.from.avatar = this.$global.getAvatar(value.from.avatar)
-            // })
-            item.isSelect = false
-          })
-          if (getMore) {
-            const list: Array<any> = res.data || [];
-            state.commentList.push(...list);
-          } else {
-            state.comment = '';
-            state.commentList = res.data;
-          }
-          hasMoreChange(res.totalPage);
-        }).finally(() => {
-          state.loading = false;
-        });
-      };
-      const subComment = () => {
-        state.loading = true;
-        if (state.comment.replace(/\s*/g, '') == '') {
-          return message.error('请输入内容');
+    export default defineComponent({
+        name: 'CommentList',
+        setup() {
+            const {currentRoute} = useRouter();
+            const id = String(currentRoute.value.query.id);
+            const store = useStore() as any;
+            const state = reactive({
+                id: null,
+                noteData: {},
+                user: {},
+                comment: '',
+                commentList: [] as any,
+                replyContent: '',
+                showReply: false,
+                replyIndex: 0,
+                showCommentReply: false,
+                commentReplyIndex: 0,
+                commentReplyId: '',
+                isHover: false,
+                hoverId: null,
+                pageData: {
+                    page: 1,
+                    pageSize: 10
+                },
+                showAllComment: false,
+                commentId: '',
+                hasMore: false,
+                loading: false
+            });
+            onMounted(() => {
+                getCommentData();
+            });
+            const isAuthor = (item: { _id: string }) => {
+                return store.state.user.info === item._id;
+            };
+            const getCommentData = (replyPageSize = 2, getMore = false) => {
+                state.loading = true;
+                getComment({
+                    noteId: id,
+                    replyPageSize: replyPageSize,
+                    page: state.pageData.page,
+                    pageSize: state.pageData.pageSize
+                }).then((res: any) => {
+                    res.data.list.forEach((item: any) => {
+                        // item.createTime = this.$global.initTime(item.createTime);
+                        // item.user.avatar = this.$global.getAvatar(item.user.avatar)
+                        // item.replyList.data.forEach((value:any)=>{
+                        //   value.createTime = this.$global.initTime(value.createTime)
+                        //   value.from.avatar = this.$global.getAvatar(value.from.avatar)
+                        // })
+                        item.isSelect = false
+                    })
+                    if (getMore) {
+                        const list: Array<any> = res.data || [];
+                        state.commentList.push(...list);
+                    } else {
+                        state.comment = '';
+                        state.commentList = res.data.list;
+                    }
+                    hasMoreChange(res.data.totalPage);
+                }).finally(() => {
+                    state.loading = false;
+                });
+            };
+            const subComment = () => {
+                state.loading = true;
+                if (state.comment.replace(/\s*/g, '') == '') {
+                    return message.error('请输入内容');
+                }
+                addComment({
+                    noteId: id,
+                    content: state.comment,
+                }).then((res) => {
+                    // res.data.createTime = this.$global.initTime(res.data.createTime)
+                    // res.data.user.avatar = this.$global.getAvatar(res.data.user.avatar)
+                    state.commentList.unshift(res.data);
+                    message.success('评论成功');
+                    state.comment = '';
+                }).finally(() => {
+                    state.loading = false;
+                });
+            };
+            const hasMoreChange = (totalPage: number) => {
+                if (state.pageData.page < totalPage) {
+                    state.hasMore = true;
+                } else {
+                    state.hasMore = false;
+                }
+            };
+            const toReply = (i: number) => {
+                if (i == state.replyIndex) {
+                    state.showReply = !state.showReply;
+                } else {
+                    state.showReply = true;
+                    state.replyIndex = i;
+                }
+                state.replyContent = '';
+            };
+            const subReply = (item: any, i: number) => {
+                state.loading = true;
+                addReply({
+                    commentId: item._id,
+                    toUserId: item.user._id,
+                    content: state.replyContent,
+                }).then((res) => {
+                    // res.data.user.avatar = this.$global.getAvatar(res.data.user.avatar)
+                    // res.data.createTime=this.$global.initTime(res.data.createTime)
+                    state.commentList[i].replyList.list.unshift(res.data);
+                    state.commentList[i].isSelect = true;
+                    message.success('回复成功');
+                    state.showReply = false;
+                    state.replyIndex = 0;
+                    state.replyContent = '';
+                }).finally(() => {
+                    state.loading = false;
+                });
+            };
+            const toCommentReply = (i: number, id: string) => {
+                if (i == state.commentReplyIndex && state.commentReplyId == id) {
+                    state.showCommentReply = !state.showCommentReply;
+                } else {
+                    state.showCommentReply = true;
+                    state.commentReplyIndex = i;
+                    state.commentReplyId = id;
+                }
+            };
+            const subCommentReply = (value: any, commentId: string, i: number) => {
+                addReply({
+                    commentId: commentId,
+                    toUserId: value.to._id,
+                    content: state.replyContent,
+                }).then((res) => {
+                    message.success('回复成功');
+                    // res.data.createTime=state.$global.initTime(res.data.createTime)
+                    // res.data.user.avatar = state.$global.getAvatar(res.data.user.avatar)
+                    state.commentList[i].replyList.list.unshift(res.data);
+                    state.commentList[i].isSelect = true;
+                    state.showCommentReply = false;
+                    state.commentReplyIndex = 0;
+                    state.commentReplyId = '';
+                    state.replyContent = '';
+                }).finally(() => {
+                    state.loading = false;
+                });
+            };
+            const hoverBottom = (e: any) => {
+                state.isHover = true;
+                state.hoverId = e._id;
+            };
+            const outBottom = () => {
+                state.isHover = false;
+                state.hoverId = null;
+            };
+            // 查看更多回复
+            const getMoreReply = (commentId: string, index: number) => {
+                moreReply({commentId, pageData: state.pageData}).then((res) => {
+                    // res.data.forEach((value)=>{
+                    //   value.createTime= this.$global.initTime(value.createTime)
+                    //   value.from.avatar = this.$global.getAvatar(value.from.avatar)
+                    // })
+                    state.commentList[index].replyList = res.data.list;
+                    state.commentList[index].isSelect = true;
+                }).finally(() => {
+                    state.loading = false;
+                });
+            };
+            // 查看所有回复
+            const getAllReply = (commentId: string, index: number) => {
+                state.commentId = commentId;
+                state.showAllComment = true;
+            };
+            // 点赞
+            const addLiked = (type: number, id: string, index: number, idx: number) => {
+                state.loading = true;
+                // type=0:点赞评论，type=1：点赞回复
+                addCommentLike({
+                    type: type,
+                    id: id
+                }).then((res) => {
+                    if (type == 0) {
+                        state.commentList[index].liked = {isLiked: res.data.result, likedCount: res.data.count};
+                    } else {
+                        state.commentList[index].replyList.data[idx].liked = {
+                            isLiked: res.data.result,
+                            likedCount: res.data.count
+                        };
+                    }
+                }).finally(() => {
+                    state.loading = false;
+                });
+            };
+            return {
+                ...toRefs(state),
+                toReply,
+                subReply,
+                toCommentReply,
+                subCommentReply,
+                hoverBottom,
+                outBottom,
+                getMoreReply,
+                getAllReply,
+                addLiked,
+                subComment,
+                isAuthor
+            };
         }
-        addComment({
-          noteId: id,
-          content: state.comment,
-        }).then((res) => {
-          // res.data.createTime = this.$global.initTime(res.data.createTime)
-          // res.data.user.avatar = this.$global.getAvatar(res.data.user.avatar)
-          state.commentList.unshift(res.data);
-          message.success('评论成功');
-          state.comment = '';
-        }).finally(() => {
-          state.loading = false;
-        });
-      };
-      const hasMoreChange = (totalPage: number) => {
-        if (state.pageData.page < totalPage) {
-          state.hasMore = true;
-        } else {
-          state.hasMore = false;
-        }
-      };
-      const toReply = (i: number) => {
-        if (i == state.replyIndex) {
-          state.showReply = !state.showReply;
-        } else {
-          state.showReply = true;
-          state.replyIndex = i;
-        }
-        state.replyContent = '';
-      };
-      const subReply = (item: any, i: number) => {
-        state.loading = true;
-        addReply({
-          commentId: item._id,
-          toUserId: item.user._id,
-          content: state.replyContent,
-        }).then((res) => {
-          // res.data.user.avatar = this.$global.getAvatar(res.data.user.avatar)
-          // res.data.createTime=this.$global.initTime(res.data.createTime)
-          state.commentList[i].replyList.data.unshift(res.data);
-          state.commentList[i].isSelect = true;
-          message.success('回复成功');
-          state.showReply = false;
-          state.replyIndex = 0;
-          state.replyContent = '';
-        }).finally(() => {
-          state.loading = false;
-        });
-      };
-      const toCommentReply = (i: number, id: string) => {
-        if (i == state.commentReplyIndex && state.commentReplyId == id) {
-          state.showCommentReply = !state.showCommentReply;
-        } else {
-          state.showCommentReply = true;
-          state.commentReplyIndex = i;
-          state.commentReplyId = id;
-        }
-      };
-      const subCommentReply = (value: any, commentId: string, i: number) => {
-        addReply({
-          commentId: commentId,
-          toUserId: value.to._id,
-          content: state.replyContent,
-        }).then((res) => {
-          message.success('回复成功');
-          // res.data.createTime=state.$global.initTime(res.data.createTime)
-          // res.data.user.avatar = state.$global.getAvatar(res.data.user.avatar)
-          state.commentList[i].replyList.data.unshift(res.data);
-          state.commentList[i].isSelect = true;
-          state.showCommentReply = false;
-          state.commentReplyIndex = 0;
-          state.commentReplyId = '';
-          state.replyContent = '';
-        }).finally(() => {
-          state.loading = false;
-        });
-      };
-      const hoverBottom = (e: any) => {
-        state.isHover = true;
-        state.hoverId = e._id;
-      };
-      const outBottom = () => {
-        state.isHover = false;
-        state.hoverId = null;
-      };
-      // 查看更多回复
-      const getMoreReply = (commentId: string, index: number) => {
-        moreReply({commentId, pageData: state.pageData}).then((res) => {
-          // res.data.forEach((value)=>{
-          //   value.createTime= this.$global.initTime(value.createTime)
-          //   value.from.avatar = this.$global.getAvatar(value.from.avatar)
-          // })
-          state.commentList[index].replyList = res;
-          state.commentList[index].isSelect = true;
-        }).finally(() => {
-          state.loading = false;
-        });
-      };
-      // 查看所有回复
-      const getAllReply = (commentId: string, index: number) => {
-        state.commentId = commentId;
-        state.showAllComment = true;
-      };
-      // 点赞
-      const addLiked = (type: number, id: string, index: number, idx: number) => {
-        state.loading = true;
-        // type=0:点赞评论，type=1：点赞回复
-        addCommentLike({
-          type: type,
-          id: id
-        }).then((res) => {
-          if (type == 0) {
-            state.commentList[index].liked = {isLiked: res.data.result, likedCount: res.data.count};
-          } else {
-            state.commentList[index].replyList.data[idx].liked = {isLiked: res.data.result, likedCount: res.data.count};
-          }
-        }).finally(() => {
-          state.loading = false;
-        });
-      };
-      return {
-        ...toRefs(state),
-        toReply,
-        subReply,
-        toCommentReply,
-        subCommentReply,
-        hoverBottom,
-        outBottom,
-        getMoreReply,
-        getAllReply,
-        addLiked,
-        subComment,
-        isAuthor
-      };
-    }
-  });
+    });
 </script>
 
 <style scoped>

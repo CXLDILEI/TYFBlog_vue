@@ -32,7 +32,7 @@
                     <a-card>
                         <h4>评论</h4>
                         <!-- 评论列表 -->
-                        <!--                        <CommentList></CommentList>-->
+                        <CommentList></CommentList>
                     </a-card>
                 </a-col>
             </a-row>

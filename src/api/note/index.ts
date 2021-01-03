@@ -54,7 +54,7 @@ export function uploadimg(file: Blob | FormData): ApiPromise<any> {
  * 获取笔记列表
  * @param params
  */
-export function getComment(params: { noteId: string, replyPageSize: number, pageData: any }): ApiPromise<[{ data: Array<any>, totalPage: number }]> {
+export function getComment(params: { noteId: string, replyPageSize: number, page: number, pageSize: number }): ApiPromise<[{ data: Array<any>, totalPage: number }]> {
     return get('/comment/getComment', params);
 }
 
