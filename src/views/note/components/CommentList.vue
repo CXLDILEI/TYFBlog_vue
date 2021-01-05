@@ -22,7 +22,7 @@
                 <div class="comment-list-item-top">
                     <div class="comment-list-item-top-header">
                         <div class="avatar">
-                            <img v-if="item.user.avatar" :src="item.user.avatar" alt="">
+                            <img v-if="item.user&&item.user.avatar" :src="item.user.avatar" alt="">
                             <img v-else src="../../../../src/assets/images/user.png" alt=""/>
                         </div>
                         <span>{{item.user.userName}}</span>
