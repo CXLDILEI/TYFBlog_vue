@@ -16,7 +16,7 @@
                 <div class="userInfo-ctx">
                     <a-row type="flex" :gutter="8">
                         <a-col>
-                            <a-popover class="avatar">
+                            <a-popover class="avatar" placement="bottom">
                                 <template #content>
                                     <a-button type="link" @click="loginOut">退出</a-button>
                                 </template>

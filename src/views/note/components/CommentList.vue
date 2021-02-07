@@ -73,14 +73,14 @@
                 </div>
                 <!-- 回复列表 -->
                 <div v-if="item.replyList" class="reply-list">
-                    <div class="comment-list-item reply-item" v-for="(value,idx) in item.replyList.list" :key="idx">
+                    <div class="comment-list-item reply-item" v-for="(value,idx) in item.replyList.list" :key="value._id">
                         <div class="comment-list-item-top">
                             <div class="comment-list-item-top-header">
                                 <div class="avatar">
-                                    <img v-if="value.from.avatar" :src="value.from.avatar" alt="">
+                                    <img v-if="value.from&&value.from.avatar" :src="value.from.avatar" alt="">
                                     <img src="../../../../src/assets/images/user.png" alt=""/>
                                 </div>
-                                <div v-if="value.from._id!==value.to._id">
+                                <div v-if="value.from&&value.from._id!==value.to._id">
                                     <span>{{value.from.userName}}</span><span class="more-bottom"
                                                                               v-if="isAuthor(value.from._id)">(作者)</span><span
                                         class="back-text">回复</span><span>{{value.to.userName}}</span><span
@@ -132,7 +132,6 @@
                             <a-button
                                     class="comment-btn"
                                     type="primary"
-                                    size="small"
                                     @click="subCommentReply(value,item._id,i)"
                             >提交
                             </a-button
@@ -142,7 +141,7 @@
                     <p class="more-bottom" @click="getMoreReply(item._id,i)"
                        v-if="item.replyList.total>2&&item.replyList.total<=5&&!item.isSelect">查看其他
                         {{item.replyList.total-2}} 条回复</p>
-                    <p class="more-bottom" @click="getAllReply(item._id,i)" v-if="item.replyList.total>5">查看全部
+                    <p class="more-bottom" v-if="item.replyList.total>5&&item.replyList.total>item.replyList.list.length" @click="getAllReply(item._id,i,item.replyList.total)">查看全部
                         {{item.replyList.total}} 条回复</p>
                 </div>
             </div>
@@ -189,6 +188,10 @@
                 pageData: {
                     page: 1,
                     pageSize: 10
+                },
+                replyPageData:{
+                    page:1,
+                    pageSize:10
                 },
                 showAllComment: false,
                 commentId: '',
@@ -268,12 +271,12 @@
                 state.loading = true;
                 addReply({
                     commentId: item._id,
-                    toUserId: item.user._id,
+                    to: item.user._id,
                     content: state.replyContent,
                 }).then((res) => {
                     // res.data.user.avatar = this.$global.getAvatar(res.data.user.avatar)
                     // res.data.createTime=this.$global.initTime(res.data.createTime)
-                    state.commentList[i].replyList.list.unshift(res.data);
+                    state.commentList[i].replyList.list.unshift(res.data.list);
                     state.commentList[i].isSelect = true;
                     message.success('回复成功');
                     state.showReply = false;
@@ -295,7 +298,7 @@
             const subCommentReply = (value: any, commentId: string, i: number) => {
                 addReply({
                     commentId: commentId,
-                    toUserId: value.to._id,
+                    to: value.to._id,
                     content: state.replyContent,
                 }).then((res) => {
                     message.success('回复成功');
@@ -321,21 +324,25 @@
             };
             // 查看更多回复
             const getMoreReply = (commentId: string, index: number) => {
-                moreReply({commentId, pageData: state.pageData}).then((res) => {
+                moreReply({
+                    commentId,
+                    page: state.replyPageData.page,
+                    pageSize:state.replyPageData.pageSize
+                }).then((res) => {
                     // res.data.forEach((value)=>{
                     //   value.createTime= this.$global.initTime(value.createTime)
                     //   value.from.avatar = this.$global.getAvatar(value.from.avatar)
                     // })
-                    state.commentList[index].replyList = res.data.list;
+                    state.commentList[index].replyList.list = res.data.list;
                     state.commentList[index].isSelect = true;
                 }).finally(() => {
                     state.loading = false;
                 });
             };
             // 查看所有回复
-            const getAllReply = (commentId: string, index: number) => {
-                state.commentId = commentId;
-                state.showAllComment = true;
+            const getAllReply = (commentId: string, index: number,total:number) => {
+                state.replyPageData.pageSize = total;
+                getMoreReply(commentId,index);
             };
             // 点赞
             const addLiked = (type: number, id: string, index: number, idx: number) => {

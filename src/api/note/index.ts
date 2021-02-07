@@ -81,7 +81,7 @@ export function addComment(data: {
  * 回复列表
  * @param params
  */
-export function moreReply(params: { commentId: string, pageData: any }): ApiPromise<any> {
+export function moreReply(params: { commentId: string, page: number, pageSize: number }): ApiPromise<any> {
     return get('/comment/getMoreReply', params);
 }
 
@@ -99,7 +99,7 @@ export function addCommentLike(data: { type: number, id: string }): ApiPromise<a
  */
 export function addReply(data: {
     commentId: string,
-    toUserId: string,
+    to: string,
     content: string
 }): ApiPromise<any> {
     return post('/comment/addReply', data);
