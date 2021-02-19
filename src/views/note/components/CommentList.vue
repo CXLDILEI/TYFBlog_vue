@@ -205,8 +205,8 @@
             onMounted(() => {
                 getCommentData();
             });
-            const isAuthor = (item: { _id: string }) => {
-                return store.state.user.info === item._id;
+            const isAuthor = ( id: string ) => {
+                return store.state.user?.info?._id === id;
             };
             const getCommentData = (replyPageSize = 2, getMore = false) => {
                 state.loading = true;
