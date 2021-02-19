@@ -89,8 +89,16 @@ export function moreReply(params: { commentId: string, page: number, pageSize: n
  * 点赞
  * @param data
  */
-export function addCommentLike(data: { type: number, id: string }): ApiPromise<any> {
-    return post('/comment/addCommentLike', data);
+export function addCommentLike(data: { type: number, sourceId: string }): ApiPromise<any> {
+    return post('/liked/addLiked', data);
+}
+
+/**
+ * 取消点赞
+ * @param data
+ */
+export function cancelLike(data: { type: number, sourceId: string }):ApiPromise<any> {
+    return post('/liked/cancelLike',data);
 }
 
 /**

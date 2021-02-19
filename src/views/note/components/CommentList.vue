@@ -34,9 +34,9 @@
                     {{item.content}}
                 </div>
                 <div class="comment-list-item-bottom" @mouseover="hoverBottom(item)" @mouseout="outBottom(item)">
-                    <div class="comment-list-item-bottom-item" @click="addLiked(0,item._id,i)" v-if="item.liked">
-                        <img v-if="item.liked.isLiked" src="../../../../src/assets/images/zan-y.png" alt=""/>
-                        <img v-if="!item.liked.isLiked" src="../../../../src/assets/images/zan-n.png" alt=""/>
+                    <div class="comment-list-item-bottom-item" v-if="item.liked">
+                        <img v-if="item.liked.isLiked" @click="toCancelLike(LikedType.Comment,item._id,i)" src="../../../../src/assets/images/zan-y.png" alt=""/>
+                        <img v-if="!item.liked.isLiked" @click="addLiked(LikedType.Comment,item._id,i)" src="../../../../src/assets/images/zan-n.png" alt=""/>
                         <span>{{item.liked.likedCount}}</span>
                     </div>
                     <div class="comment-list-item-bottom-item" v-show="isHover&&hoverId==item._id">
@@ -73,7 +73,8 @@
                 </div>
                 <!-- 回复列表 -->
                 <div v-if="item.replyList" class="reply-list">
-                    <div class="comment-list-item reply-item" v-for="(value,idx) in item.replyList.list" :key="value._id">
+                    <div class="comment-list-item reply-item" v-for="(value,idx) in item.replyList.list"
+                         :key="value._id">
                         <div class="comment-list-item-top">
                             <div class="comment-list-item-top-header">
                                 <div class="avatar">
@@ -98,10 +99,9 @@
                         </div>
                         <div class="comment-list-item-bottom" @mouseover="hoverBottom(value)"
                              @mouseout="outBottom(value)">
-                            <div v-if="value.liked" class="comment-list-item-bottom-item"
-                                 @click="addLiked(1,value._id,i,idx)">
-                                <img v-if="value.liked.isLiked" src="../../../../src/assets/images/zan-y.png" alt=""/>
-                                <img v-if="!value.liked.isLiked" src="../../../../src/assets/images/zan-n.png" alt=""/>
+                            <div v-if="value.liked" class="comment-list-item-bottom-item">
+                                <img v-if="value.liked.isLiked" @click="toCancelLike(LikedType.Reply,value._id,i,idx)" src="../../../../src/assets/images/zan-y.png" alt=""/>
+                                <img v-if="!value.liked.isLiked" @click="addLiked(LikedType.Reply,value._id,i,idx)" src="../../../../src/assets/images/zan-n.png" alt=""/>
                                 <span>{{value.liked.likedCount}}</span>
                             </div>
                             <div class="comment-list-item-bottom-item" v-show="isHover&&hoverId==value._id">
@@ -141,7 +141,9 @@
                     <p class="more-bottom" @click="getMoreReply(item._id,i)"
                        v-if="item.replyList.total>2&&item.replyList.total<=5&&!item.isSelect">查看其他
                         {{item.replyList.total-2}} 条回复</p>
-                    <p class="more-bottom" v-if="item.replyList.total>5&&item.replyList.total>item.replyList.list.length" @click="getAllReply(item._id,i,item.replyList.total)">查看全部
+                    <p class="more-bottom"
+                       v-if="item.replyList.total>5&&item.replyList.total>item.replyList.list.length"
+                       @click="getAllReply(item._id,i,item.replyList.total)">查看全部
                         {{item.replyList.total}} 条回复</p>
                 </div>
             </div>
@@ -159,11 +161,12 @@
 </template>
 
 <script lang="ts">
-    import {defineComponent, onMounted, getCurrentInstance, toRefs, reactive, computed} from 'vue';
-    import {getComment, addReply, moreReply, addCommentLike, addComment} from '@/api/note';
+    import {defineComponent, onMounted, toRefs, reactive} from 'vue';
+    import {getComment, addReply, moreReply, addCommentLike, addComment, cancelLike} from '@/api/note';
     import {useRouter} from 'vue-router';
     import {message} from 'ant-design-vue';
     import {useStore} from 'vuex';
+    import {LikedType, LikedStatus} from '@/util/enum';
 
     export default defineComponent({
         name: 'CommentList',
@@ -189,14 +192,15 @@
                     page: 1,
                     pageSize: 10
                 },
-                replyPageData:{
-                    page:1,
-                    pageSize:10
+                replyPageData: {
+                    page: 1,
+                    pageSize: 10
                 },
                 showAllComment: false,
                 commentId: '',
                 hasMore: false,
-                loading: false
+                loading: false,
+                LikedType: LikedType
             });
             onMounted(() => {
                 getCommentData();
@@ -327,7 +331,7 @@
                 moreReply({
                     commentId,
                     page: state.replyPageData.page,
-                    pageSize:state.replyPageData.pageSize
+                    pageSize: state.replyPageData.pageSize
                 }).then((res) => {
                     // res.data.forEach((value)=>{
                     //   value.createTime= this.$global.initTime(value.createTime)
@@ -340,30 +344,53 @@
                 });
             };
             // 查看所有回复
-            const getAllReply = (commentId: string, index: number,total:number) => {
+            const getAllReply = (commentId: string, index: number, total: number) => {
                 state.replyPageData.pageSize = total;
-                getMoreReply(commentId,index);
+                getMoreReply(commentId, index);
             };
             // 点赞
             const addLiked = (type: number, id: string, index: number, idx: number) => {
                 state.loading = true;
-                // type=0:点赞评论，type=1：点赞回复
+                // type=0 点赞评论，type=1 点赞回复
                 addCommentLike({
                     type: type,
-                    id: id
+                    sourceId: id
                 }).then((res) => {
-                    if (type == 0) {
-                        state.commentList[index].liked = {isLiked: res.data.result, likedCount: res.data.count};
+                    console.log(state.commentList);
+                    if (type == LikedType.Comment) {
+                        state.commentList[index].liked = {
+                            isLiked: res.data === LikedStatus.Liked,
+                            likedCount: ++state.commentList[index].liked.likedCount
+                        };
                     } else {
-                        state.commentList[index].replyList.data[idx].liked = {
-                            isLiked: res.data.result,
-                            likedCount: res.data.count
+                        state.commentList[index].replyList.list[idx].liked = {
+                            isLiked: res.data === LikedStatus.Liked,
+                            likedCount: ++state.commentList[index].replyList.list[idx].liked.likedCount
                         };
                     }
                 }).finally(() => {
                     state.loading = false;
                 });
             };
+            const toCancelLike = (type: number, id: string, index: number, idx: number)=>{
+                state.loading = true;
+                cancelLike({
+                    type: type,
+                    sourceId: id
+                }).then((res)=>{
+                    if (type == LikedType.Comment) {
+                        state.commentList[index].liked = {
+                            isLiked: res.data === LikedStatus.Liked,
+                            likedCount: --state.commentList[index].liked.likedCount
+                        };
+                    } else {
+                        state.commentList[index].replyList.list[idx].liked = {
+                            isLiked: res.data === LikedStatus.Liked,
+                            likedCount: --state.commentList[index].replyList.list[idx].liked.likedCount
+                        };
+                    }
+                })
+            }
             return {
                 ...toRefs(state),
                 toReply,
@@ -376,7 +403,8 @@
                 getAllReply,
                 addLiked,
                 subComment,
-                isAuthor
+                isAuthor,
+                toCancelLike
             };
         }
     });
