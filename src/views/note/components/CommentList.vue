@@ -280,7 +280,7 @@
                 }).then((res) => {
                     // res.data.user.avatar = this.$global.getAvatar(res.data.user.avatar)
                     // res.data.createTime=this.$global.initTime(res.data.createTime)
-                    state.commentList[i].replyList.list.unshift(res.data.list);
+                    state.commentList[i].replyList.list.unshift(res.data);
                     state.commentList[i].isSelect = true;
                     message.success('回复成功');
                     state.showReply = false;
