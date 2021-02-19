@@ -356,7 +356,6 @@
                     type: type,
                     sourceId: id
                 }).then((res) => {
-                    console.log(state.commentList);
                     if (type == LikedType.Comment) {
                         state.commentList[index].liked = {
                             isLiked: res.data === LikedStatus.Liked,
