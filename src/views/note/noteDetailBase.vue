@@ -41,7 +41,7 @@
 </template>
 
 <script lang="ts">
-    import {defineComponent, onMounted, getCurrentInstance, toRefs, reactive} from 'vue';
+    import {defineComponent, onMounted, toRefs, reactive} from 'vue';
     import {getNoteDetail, noteDelete} from '@/api/note';
     import {atob} from '@/util/helper';
     import {DeleteOutlined, EditOutlined} from '@ant-design/icons-vue';

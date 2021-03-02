@@ -30,7 +30,7 @@
                 </div>
             </a-layout-header>
             <a-layout-content class="main-layout-content">
-                <div class="backgound"></div>
+                <div class="backgound" :style="{'background':`url(${backgroundImg})`}"></div>
                 <router-view></router-view>
             </a-layout-content>
         </a-layout>
@@ -38,60 +38,70 @@
 </template>
 
 <script lang="ts">
-    import {reactive, ref, defineComponent, computed} from 'vue';
-    import {removeToken} from '@/util/auth';
-    import {useStore} from 'vuex';
-    import {useRouter} from 'vue-router';
+  import {reactive, ref, defineComponent, computed, toRefs,onMounted} from 'vue';
+  import {removeToken} from '@/util/auth';
+  import {useStore} from 'vuex';
+  import {useRouter} from 'vue-router';
+  import {get as httpGet} from '@/api';
 
-    export default defineComponent({
-        name: 'MainLayout',
-        setup() {
-            const selectedKeys = ref<String>('1');
-            const {push} = useRouter();
-            const store = useStore() as any;
-            const componentList = reactive([
-                {
-                    name: '首页',
-                    component: '/home',
-                    key: '1'
-                },
-                {
-                    name: '新笔记',
-                    component: '/addNote',
-                    key: '2'
-                }
-            ]);
-            const userInfo = computed(() => {
-                return store.state.user.info;
-            });
-            const toMenu = ((name: string) => {
-                push({
-                    name
-                });
-            });
-            const authMenus = () => {
-                if (!userInfo.value) {
-                    push({
-                        name: '/login'
-                    });
-                }
-            };
-            const loginOut = () => {
-                removeToken();
-                push({
-                    name: '/login'
-                });
-            };
-            return {
-                selectedKeys,
-                componentList,
-                toMenu,
-                authMenus,
-                loginOut,
-                userInfo
-            };
+  export default defineComponent({
+    name: 'MainLayout',
+    setup() {
+      const selectedKeys = ref<String>('1');
+      const {push} = useRouter();
+      const store = useStore() as any;
+      const componentList = reactive([
+        {
+          name: '首页',
+          component: '/home',
+          key: '1'
+        },
+        {
+          name: '新笔记',
+          component: '/addNote',
+          key: '2'
         }
-    });
+      ]);
+      const status = reactive({
+        backgroundImg: '',
+      });
+      const userInfo = computed(() => {
+        return store.state.user.info;
+      });
+      onMounted(()=>{
+        httpGet('../../../backgound-img.jpg',undefined,{baseURL:'127.0.0.1',responseType: 'blob'}).then((res)=>{
+          status.backgroundImg = window.URL.createObjectURL(res)
+        })
+      })
+      const toMenu = ((name: string) => {
+        push({
+          name
+        });
+      });
+      const authMenus = () => {
+        if (!userInfo.value) {
+          push({
+            name: '/login'
+          });
+        }
+      };
+      const loginOut = () => {
+        removeToken();
+        push({
+          name: '/login'
+        });
+      };
+      return {
+        selectedKeys,
+        componentList,
+        toMenu,
+        authMenus,
+        loginOut,
+        userInfo,
+        ...toRefs(status)
+      };
+    }
+  });
 </script>
 
 <style scoped>

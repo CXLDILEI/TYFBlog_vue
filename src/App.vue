@@ -42,7 +42,6 @@
         width: 100%;
         height: 100%;
         z-index: 0;
-        background: url("./assets/backgound-img.jpg");
         zoom: 1;
         background-color: #ffff;
         background-repeat: no-repeat;
@@ -51,6 +50,7 @@
         -webkit-background-size: cover;
         -o-background-size: cover;
         background-attachment: fixed;
+        background-color: #ececec;
         opacity: .7;
     }
 

@@ -86,6 +86,10 @@ _axios.interceptors.request.use(
 // 响应拦截器
 _axios.interceptors.response.use(
     function (response) {
+        if(response.data instanceof Blob){
+            //是流文件
+            return Promise.resolve(response);
+        }
         if (response.data.code === 0) {
             // 只返回response中的data数据
             return Promise.resolve(response);
