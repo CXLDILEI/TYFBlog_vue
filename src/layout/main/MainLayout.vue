@@ -126,6 +126,7 @@
     .main-layout-content {
         position: relative;
         padding-top: 64px;
+        background-color: rgba(64, 169, 255, 0.29);
     }
 
     .userInfo-ctx {

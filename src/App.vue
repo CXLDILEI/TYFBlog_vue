@@ -36,7 +36,6 @@
     }
 
     .backgound {
-        background-attachment: fixed;
         position: absolute;
         top: 0;
         left: 0;
@@ -44,14 +43,13 @@
         height: 100%;
         z-index: 0;
         zoom: 1;
-        background-color: #ffff;
         background-repeat: no-repeat;
         background-position: center 0;
         background-size: cover;
         -webkit-background-size: cover;
         -o-background-size: cover;
-        background-attachment: fixed;
-        background-color: #ececec;
+        background-color: #40a9ff73;
+        background-attachment: fixed !important;
         opacity: .7;
     }
 
